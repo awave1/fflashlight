@@ -69,7 +69,7 @@ class _MyAppState extends State<MyApp> {
               SwitchListTile(
                 title: const Text("flashlightState"),
                 secondary: _flashlightState ? const Icon(Icons.flash_on) : const Icon(Icons.flash_off),
-                onChanged: _onSwitchChanged,
+                onChanged: _hasFlashlight ? _onSwitchChanged : null,
                 value: _flashlightState,
               ),
             ],
