@@ -2,7 +2,7 @@ package com.awave.fflashlight
 
 import android.content.Context
 import android.content.pm.PackageManager
-import android.graphics.Camera
+import android.hardware.Camera
 import android.hardware.camera2.CameraManager
 import android.os.Build
 import io.flutter.plugin.common.MethodCall
@@ -42,23 +42,32 @@ class FflashlightPlugin(r: Registrar) : MethodCallHandler {
   }
 
   private fun enable(state: Boolean) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-      // new way
+    if (!hasFlashlight()) {
+      return
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
       val cameraManager = registrar.context().getSystemService(Context.CAMERA_SERVICE) as CameraManager?
       cameraManager?.let {
         val cameraId = it.cameraIdList[0]
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-          it.setTorchMode(cameraId, state)
-        }
+        it.setTorchMode(cameraId, state)
       }
     } else {
-      // deprecated way
-      TODO()
+      val camera = Camera.open()
+
+      if (state) {
+        camera.parameters.flashMode = Camera.Parameters.FLASH_MODE_TORCH
+        camera.startPreview()
+      } else {
+        camera.parameters.flashMode = Camera.Parameters.FLASH_MODE_OFF
+        camera.stopPreview()
+        camera.release()
+      }
     }
   }
 
-  private fun hasFlashlight() = registrar.context()
+  private fun hasFlashlight() = registrar
+          .context()
           .applicationContext
           .packageManager
           .hasSystemFeature(PackageManager.FEATURE_CAMERA_FLASH)
