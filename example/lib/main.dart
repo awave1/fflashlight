@@ -12,7 +12,8 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
+  bool _hasFlashlight = false;
+  bool _flashlightState = false;
 
   @override
   void initState() {
@@ -22,12 +23,12 @@ class _MyAppState extends State<MyApp> {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> initPlatformState() async {
-    String platformVersion;
+    bool hasFlashlight;
     // Platform messages may fail, so we use a try/catch PlatformException.
     try {
-      platformVersion = await Fflashlight.platformVersion;
+      hasFlashlight = await Fflashlight.hasFlashlight;
     } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
+      hasFlashlight = false;
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -36,8 +37,16 @@ class _MyAppState extends State<MyApp> {
     if (!mounted) return;
 
     setState(() {
-      _platformVersion = platformVersion;
+      _hasFlashlight = hasFlashlight;
     });
+  }
+
+  void _onSwitchChanged(bool value) async {
+    setState(() {
+      _flashlightState = value;
+    });
+
+    await Fflashlight.enable(value);
   }
 
   @override
@@ -45,10 +54,26 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Fflashlight Example'),
         ),
         body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+          child: Column(
+            children: <Widget>[
+              ListTile(
+                title: Text(
+                  'hasFlashlight',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
+                ),
+                subtitle: Text("$_hasFlashlight"),
+              ),
+              SwitchListTile(
+                title: const Text("flashlightState"),
+                secondary: _flashlightState ? const Icon(Icons.flash_on) : const Icon(Icons.flash_off),
+                onChanged: _onSwitchChanged,
+                value: _flashlightState,
+              ),
+            ],
+          ),
         ),
       ),
     );
