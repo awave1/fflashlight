@@ -21,13 +21,13 @@ public class SwiftFflashlightPlugin: NSObject, FlutterPlugin {
         case "enable":
             guard let args = call.arguments as? [String: Any] else { return }
             guard let state = args["state"] as? Bool else { return }
-            result(enable(state: state))
+            result(enable(state: state, result: result))
             break
         case "on":
-            result(enable(state: true))
+            result(enable(state: true, result: result))
             break
         case "off":
-            result(enable(state: false))
+            result(enable(state: false, result: result))
             break
         case "hasFlashlight":
             result(hasFlashlight)
@@ -38,7 +38,20 @@ public class SwiftFflashlightPlugin: NSObject, FlutterPlugin {
         }
     }
 
-    private func enable(state: Bool) {
-        
+    private func enable(state: Bool, result: @escaping FlutterResult) {
+        if (hasFlashlight) {
+            guard let device = AVCaptureDevice.default(for: .video) else {
+                result(FlutterError(code: "1", message: "Failed to initialize AVCaptureDevice", details: nil))
+                return
+            }
+
+            do {
+                try device.lockForConfiguration()
+                device.torchMode = state ? .on : .off
+                device.unlockForConfiguration()
+            } catch {
+                result(FlutterError(code: "2", message: error.localizedDescription, details: nil))
+            }
+        }
     }
 }
