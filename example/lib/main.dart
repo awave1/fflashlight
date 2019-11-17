@@ -13,6 +13,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   bool _hasFlashlight = false;
+  bool _flashlightState = false;
 
   @override
   void initState() {
@@ -40,17 +41,37 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
+  void _onSwitchChanged(bool value) async {
+    setState(() {
+      _flashlightState = value;
+    });
+
+    await Fflashlight.enable(value);
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: const Text('Fflashlight Example'),
         ),
         body: Center(
           child: Column(
             children: <Widget>[
-              Text('hasFlashlight: $_hasFlashlight'),
+              ListTile(
+                title: Text(
+                  'hasFlashlight',
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)
+                ),
+                subtitle: Text("$_hasFlashlight"),
+              ),
+              SwitchListTile(
+                title: const Text("flashlightState"),
+                secondary: _flashlightState ? const Icon(Icons.flash_on) : const Icon(Icons.flash_off),
+                onChanged: _onSwitchChanged,
+                value: _flashlightState,
+              ),
             ],
           ),
         ),
