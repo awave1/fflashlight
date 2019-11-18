@@ -9,7 +9,7 @@
   </a>
 </p>
 
-> Flutter Flashlight Plugin
+> Flutter Flashlight Plugin. There's not much to add, really.
 
 ## Install
 
